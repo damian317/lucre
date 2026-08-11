@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b0c" />
+  <title>Una pista</title>
+  <style>
+    :root{--bg:#0b0b0c;--fg:#f3f3f4;--muted:#8e8e93}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      background:var(--bg);color:var(--fg);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      display:grid;place-items:center;overflow:hidden
+    }
+    main{width:min(92vw,720px);text-align:center;padding:32px 20px}
+    .eyebrow{text-transform:uppercase;letter-spacing:.28em;font-size:12px;color:var(--muted);margin-bottom:30px}
+    #timer{font-variant-numeric:tabular-nums;font-size:clamp(48px,13vw,112px);font-weight:300;line-height:1;margin:0 0 28px}
+    .copy{color:var(--muted);font-size:16px;line-height:1.65;max-width:520px;margin:0 auto}
+    .hidden{display:none!important}
+    #reveal{animation:fadeIn 1.2s ease both}
+    #reveal h1{font-size:clamp(32px,7vw,60px);font-weight:500;margin:0 0 18px}
+    #reveal p{color:var(--muted);font-size:16px;line-height:1.65;margin:0 auto 30px;max-width:540px}
+    .btn{
+      display:inline-block;padding:14px 20px;border:1px solid var(--fg);border-radius:999px;
+      color:var(--bg);background:var(--fg);text-decoration:none;font-weight:600
+    }
+    .small{margin-top:18px;font-size:13px;color:var(--muted)}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body>
+  <main>
+    <section id="countdown">
+      <div class="eyebrow">Pediste ayuda</div>
+      <div id="timer">00:05:00</div>
+      <p class="copy">Algunas respuestas requieren paciencia.</p>
+    </section>
+
+    <section id="reveal" class="hidden">
+      <div class="eyebrow">Una pista</div>
+      <h1>No es la respuesta.</h1>
+      <p>Es solamente el alfabeto que necesitás para descifrarla.</p>
+
+      <a class="btn"
+         href="https://ciphersonline.com/codes-and-alphabets/pigpen"
+         target="_blank"
+         rel="noopener noreferrer">
+        VER LA CLAVE DEL CIFRADO
+      </a>
+
+      <div class="small">Buscá la variante Standard (Masonic).</div>
+    </section>
+  </main>
+
+  <script>
+    const RELATIVE_MINUTES = 5;
+    const STORAGE_KEY = "lucre_help_unlock_v1";
+
+    const countdownEl = document.getElementById("countdown");
+    const revealEl = document.getElementById("reveal");
+    const timerEl = document.getElementById("timer");
+
+    function getUnlockTime(){
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if(saved) return Number(saved);
+
+      const unlock = Date.now() + RELATIVE_MINUTES * 60 * 1000;
+      localStorage.setItem(STORAGE_KEY, String(unlock));
+      return unlock;
+    }
+
+    const unlockTime = getUnlockTime();
+
+    function pad(n){ return String(n).padStart(2,"0"); }
+
+    function reveal(){
+      countdownEl.classList.add("hidden");
+      revealEl.classList.remove("hidden");
+      document.title = "Una pista";
+    }
+
+    function tick(){
+      const diff = unlockTime - Date.now();
+
+      if(diff <= 0){
+        timerEl.textContent = "00:00:00";
+        reveal();
+        return;
+      }
+
+      const totalSeconds = Math.floor(diff / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      timerEl.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+      setTimeout(tick, 250);
+    }
+
+    tick();
+  </script>
+</body>
+</html>
