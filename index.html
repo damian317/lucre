@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#090909">
+  <title>Primera pista</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <section class="card">
+      <div id="waiting">
+        <p class="kicker">Primera etapa</p>
+        <h1>LA PRIMERA PISTA<br>ESTARÁ DISPONIBLE EN</h1>
+
+        <div id="timer" class="timer" aria-live="polite">05:00</div>
+
+        <p class="small">Cerrar o recargar esta página no reinicia la espera.</p>
+      </div>
+
+      <div id="reveal" class="hidden">
+        <p class="kicker">Primera pista</p>
+        <h1>UNA PALABRA</h1>
+        <p class="subtitle">Seis letras. Una sola combinación abre lo que tenés delante.</p>
+
+        <div class="rule"></div>
+
+        <div class="clue-label">Pista</div>
+        <p class="clue">NOSOTROS</p>
+
+        <p class="note">Podés probar todas las veces que quieras directamente en el Cryptex.</p>
+
+        <a class="button" href="ayuda.html">ME RINDO</a>
+      </div>
+    </section>
+
+    <div class="footer">No todo se resuelve enseguida.</div>
+  </main>
+
+  <script>
+  (() => {
+    const TIMER_MINUTES = 5;
+    const STORAGE_KEY = "lucre_cryptex_first_unlock_v1";
+
+    const waiting = document.getElementById("waiting");
+    const reveal = document.getElementById("reveal");
+    const timer = document.getElementById("timer");
+    const params = new URLSearchParams(location.search);
+
+    if (params.get("reset") === "1") {
+      localStorage.removeItem(STORAGE_KEY);
+      history.replaceState({}, "", "index.html");
+    }
+
+    const durationMs = params.get("test") === "1"
+      ? 10 * 1000
+      : TIMER_MINUTES * 60 * 1000;
+
+    let unlockAt = Number(localStorage.getItem(STORAGE_KEY));
+
+    if (!unlockAt || Number.isNaN(unlockAt)) {
+      unlockAt = Date.now() + durationMs;
+      localStorage.setItem(STORAGE_KEY, String(unlockAt));
+    }
+
+    const showReveal = () => {
+      waiting.classList.add("hidden");
+      reveal.classList.remove("hidden");
+      reveal.classList.add("reveal");
+    };
+
+    const tick = () => {
+      const remaining = unlockAt - Date.now();
+
+      if (remaining <= 0) {
+        showReveal();
+        return;
+      }
+
+      const totalSeconds = Math.ceil(remaining / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+
+      timer.textContent =
+        String(minutes).padStart(2, "0") + ":" +
+        String(seconds).padStart(2, "0");
+
+      setTimeout(tick, 250);
+    };
+
+    tick();
+  })();
+  </script>
+</body>
+</html>
